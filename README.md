@@ -1,1 +1,1 @@
-[View Documentation](guide.md)
+[View Guide](index)
