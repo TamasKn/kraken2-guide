@@ -1,1 +1,1 @@
-[View Guide](index)
+[View Guide](index.md)
