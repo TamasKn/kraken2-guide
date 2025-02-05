@@ -21,9 +21,11 @@ for the task, is listed as an alternative option.
 - Basic understanding of CLI (Command Line Interface) to use the listed tools
 - *Optional*: Knowledge of Bash or other scripting/programming language (Python, R, etc.)
 
+
 ### Terminal commands
 
 CLI or Terminal commands are in Bash (which is the default language of Linux terminals). Many of them uses placeholder reference to a data or location `<some/location>`. This placeholder will not work, as it is, on your computer, as long as does not refer to a real source.
+
 
 *For example:*
 
@@ -35,6 +37,65 @@ kraken2-build --build --db <database/location>
 - Remove the `< >` symbols for the correct path.
 
 Some commands are with specific parameters, for example: `-q 30`; setting depends on the project, dataset and requirements, make sure you do your research what is the optimal parameter for your specific use case. If you are not sure, you may use the listed ones, but keep in mind that may result incorrect or misleading results.
+
+
+### Multiple files handling
+
+Most likely you will have a dataset with many-many files. As the commands are written for single use, optimally you want to loop through all the files in order to generate the result from all of them, also making sure the output file naming does not overwrite any existing and important file.
+
+While the guide should work without any programming knowledge, for time-saving I highly recommend to learn the concept of Loops. Which is basically just jumping to each file and apply a command them one-by-one quickly.
+
+*Bash loop example:*
+
+```text
+Dataset (paired-end):
+
+SEQ_01_R1.fastq
+SEQ_01_R2.fastq
+SEQ_02_R1.fastq
+SEQ_02_R2.fastq
+SEQ_03_R1.fastq
+SEQ_03_R2.fastq
+SEQ_04_R1.fastq
+SEQ_04_R2.fastq
+SEQ_05_R1.fastq
+SEQ_05_R2.fastq
+```
+
+```bash
+#!/bin/bash
+
+# Loop through files from SEQ_01 to SEQ_05
+for i in {01..05}; do
+    R1="SEQ_${i}_R1.fastq"
+    R2="SEQ_${i}_R2.fastq"
+    
+    echo "Processing $R1 and $R2..."
+    
+    fastqc -o SEQ_${i} "$R1" "$R2"
+done
+```
+The script will read the names of the files, running FastQC with pair-end input and creates a result with the pair name.
+
+If the concept seems difficult here are some brief tutorials:
+- [Bash in general](https://www.freecodecamp.org/news/bash-scripting-tutorial-linux-shell-script-and-command-line-for-beginners/)
+- [Loops in Bash](https://www.geeksforgeeks.org/bash-scripting-for-loop/)
+
+### Windows
+
+If a Linux or Mac system is not available, the easiest way for Windows users is the [Git for Windows](https://gitforwindows.org) tool, that includes a Git Bash application that behaves almost identical to a native Unix command line (with some limitations).
+
+Path: use `/c/User/YourFolder` to access `C:\User\YourFolder`
+
+Running Bash file:
+
+- Open Notepad and paste the following: 
+```text
+#!/bin/bash
+
+echo "Hello from Git Bash"
+```
+- Save it as `my_script.sh` somewhere you will find. Navigate to that location, right click on an empty space, if Git for Windows is installed, you should see in the dropdown, open it and run: `bash my_script.sh` If you see the `Hello from Git Bash` message, it works as expected.
 
 ---
 
