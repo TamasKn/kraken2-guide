@@ -181,6 +181,7 @@ Quality control (QC), filtering, and trimming are essential for processing long 
 
 ### **2. Quality Control, Trim and Filter**
    - Tool: **[FastPLong](https://github.com/OpenGene/fastplong)**
+   - Alternative tools: NanoPlot, pycoQC, PoreChop, FiltLong
    - Purpose: Evaluate read length distribution, quality scores, and sequencing statistics.
 
         ```bash
