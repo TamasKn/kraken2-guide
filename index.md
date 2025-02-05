@@ -25,7 +25,7 @@ for the task, is listed as an alternative option.
 
 CLI or Terminal commands are in Bash (which is the default language of Linux terminals). Many of them uses placeholder reference to a data or location `<some/location>`. This placeholder will not work, as it is, on your computer, as long as does not refer to a real source.
 
-*For example*:
+*For example:*
 
 ```bash
 kraken2-build --build --db <database/location>
@@ -53,7 +53,7 @@ Quality Control (QC) and trimming of short reads are essential to ensure data ac
   ```bash
   fastqc -o reads_fastqc <reads_R1.fastq> <reads_R2.fastq>
   ```
-    **Parameter**:
+    **Parameter:**
     `-o`: Output file name
 
     FastQC generates several files that not necessarily useful independently. To summarize the output files, use **[MultiQC](https://github.com/MultiQC/MultiQC)** to merge the FastQC files and analyze.
@@ -74,18 +74,18 @@ Quality Control (QC) and trimming of short reads are essential to ensure data ac
   ```
   Common adapter sequences for Illumina 16S amplicon sequencing are:
 
-  **Forward adapter**:
+  **Forward adapter:**
   
   ```
   AGATCGGAAGAGCACACGTCTGAACTCCAGTCA
   ```
 
-  **Reverse adapter**:
+  **Reverse adapter:**
   ```
   AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
   ```
   
-    **Parameters**:
+    **Parameters:**
 
     `-a`: Forward adapter
  
@@ -125,7 +125,7 @@ Quality control (QC), filtering, and trimming are essential for processing long 
         ```bash
         fastplong -i <reads.fastq> -o <OUTPUT_FILENAME> -h QUALITY_CONTROL.html -j QUALITY_CONTROL.json -l 320
         ```
-        **Parameters**:
+        **Parameters:**
 
         `-i`: Input file
  
@@ -148,10 +148,92 @@ Quality control (QC), filtering, and trimming are essential for processing long 
 ---
 From this point the steps can be applied to Short- and Long-reads sequences too.
 
+---
+
+## Taxonomic Classification
+
+### Goal:
+Taxonomic classification of DNA or RNA sequences used to find exact matches in pre-built database of reference genomes.
+
+Kraken2 using exact k-mer matches to compare sequences against a reference database, assigning them to specific taxonomic groups with high accuracy. Kraken2 is particularly useful for metagenomic analysis, enabling the identification and quantification of microbial communities in complex samples. It is widely used in clinical diagnostics for pathogen detection and in environmental studies for microbiome profiling. Its flexibility, speed, and ability to handle both short and long reads make it a valuable tool for researchers.
+
+
+### **1. Install Kraken2**
+- Follow the instructions to install Kraken2 from [Kraken2 GitHub](https://github.com/DerrickWood/kraken2)
+
+- See [more details](https://ccb.jhu.edu/software/kraken2/) and publications about Kraken2.
+- Kraken2 needs to be installed in its own repository folder, then scripts can be copied to another location if prefered.
+- Scripts: `kraken2`, `kraken2-build`, `kraken2-inspect`
+
+### **2. Build the Kraken2 Database**
+This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other built-in databases and able to create from [external sources](https://benlangmead.github.io/aws-indexes/k2).
+
+- **Create a database directory:**
+   ```bash
+   mkdir /kraken2_silva
+   ```
+- **Add SILVA sequences to the Kraken2 database:**
+   ```bash
+   kraken2-build --special silva --db /kraken2_silva
+   ```
+
+   - **Note:** This process may rbe **memory (RAM) intensive** and sufficient disk space necessary, depending on the database size.
+
+### **3. Run Kraken2 for Taxonomic Classification**
+
+
+- **Paired-end reads (Short):**
+  ```bash
+  kraken2 --db </path/to/kraken2_silva> \
+    --paired <trimmed_R1.fastq> <trimmed_R2.fastq> \
+    --threads <your_cpu> \
+    --confidence 0.2 \
+    --output kraken2_output.txt \
+    --report kraken2_report.tabular
+  ```
+- **Single-end reads (Long):**
+  ```bash
+  kraken2 --db </path/to/kraken2_silva> \
+    <trimmed_reads.fastq> \
+    --threads <your_cpu> \
+    --confidence 0.2 \
+    --output kraken2_output.txt \
+    --report kraken2_report.tabular
+  ```
+    
+    **Parameters:**
+    
+  `--db`: Built Kraken2 database location
+    
+  `--paired`: Paired-end reads, usually short-read sequences are paired-end
+ 
+  `--threads`: Your CPU threads, if not sure, use `8`
+  
+  `--confidence`: Confidence score threshold must be between 0 and 1, see more details below
+    
+  `--output`: Read sequence output
+
+  `--report`: Taxonomic result, file name can be anything readable (.txt, etc.)
+
+  
+- **Confidence score**
+
+    Confidence score is a numerical value that represents the reliability or certainty of a prediction, classification, or analysis result. It provides a measure of how likely a computational result is to be correct, helping researchers prioritize high-confidence findings and filter out uncertain ones.
+  
+    - Articles:
+  
+      - [Impact of database choice and confidence score on the performance of taxonomic classification using Kraken2](https://link.springer.com/article/10.1007/s42994-024-00178-0)
+      - [An Alignment Confidence Score Capturing Robustness to Guide Tree Uncertainty](https://pmc.ncbi.nlm.nih.gov/articles/PMC2908709/)
+      - [The standardisation of the approach to metagenomic human gut analysis: from sample collection to microbiome profiling](https://www.nature.com/articles/s41598-022-12037-3)
+
+    
+**IMPORTANT**: If you encounter a result like `100% classification`, it is a **false positive**, which is likely caused by incorrect database.
+
+
+
+
+
 ----
-(Both)
-Kraken2 DB build
-Taxonomic classification
 Seqkit
 Bracken
 Visualization
