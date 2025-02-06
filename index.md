@@ -1,5 +1,6 @@
 # Detailed Bioinformatics pipelines for Short- and Long-read sequences with Kraken2
 
+*- Author: Tamas Knisz* \
 *- Funded by [European COST Action](https://www.cost.eu) and [EuroMIC](https://www.euro-mic.org)*
 
 ---
@@ -19,12 +20,12 @@ for the task, is listed as an alternative option.
 
 - Workstation with at least ***4 CPU Cores***, ***16GB RAM*** and ***75GB of free space*** (8+ Cores, 32GB+ RAM and 150GB free space recommended).
 - Basic understanding of CLI (Command Line Interface) to use the listed tools
-- *Optional*: Knowledge of Bash or other scripting/programming language (Python, R, etc.)
+- *Optional*: Knowledge of Bash or other scripting/programming language (Python or R)
 
 
 ### Terminal commands
 
-CLI or Terminal commands are in Bash (which is the default language of Linux terminals). Many of them uses placeholder reference to a data or location `<some/location>`. This placeholder will not work, as it is, on your computer, as long as does not refer to a real source.
+CLI or Terminal commands are in Bash (which is the default language of Linux terminals). Many of them use placeholder reference to a data or location `<some/location>`. This placeholder will not work, as it is, on your computer, as long as does not refer to an actual source.
 
 
 *For example:*
@@ -163,7 +164,7 @@ Quality Control (QC) and trimming of short reads are essential to ensure data ac
 ### **4. Post-Process Quality Control**
 - Run **FastQC** and **MultiQC** again on the trimmed files to ensure the quality is sufficient for downstream analysis.
 
-    **You can compare the Raw and Trimmed quality**:
+    **You can compare the Raw and Trimmed quality:**
     ```bash
     multiqc <FASTQC_PRE_TRIM_DIR> <FASTQC_POST_TRIM_DIR> -o <REPORT_DIR>
     ```
@@ -212,7 +213,7 @@ From this point the steps can be applied to Short- and Long-reads sequences too.
 
 ---
 
-## Taxonomic Classification
+## Taxonomic Classification with Kraken2
 
 ### Goal:
 Taxonomic classification of DNA or RNA sequences used to find exact matches in pre-built database of reference genomes.
@@ -220,14 +221,14 @@ Taxonomic classification of DNA or RNA sequences used to find exact matches in p
 Kraken2 using exact k-mer matches to compare sequences against a reference database, assigning them to specific taxonomic groups with high accuracy. Kraken2 is particularly useful for metagenomic analysis, enabling the identification and quantification of microbial communities in complex samples. It is widely used in clinical diagnostics for pathogen detection and in environmental studies for microbiome profiling. Its flexibility, speed, and ability to handle both short and long reads make it a valuable tool for researchers.
 
 
-### **1. Install Kraken2**
+### **1. Installation**
 - Follow the instructions to install Kraken2 from [Kraken2 GitHub](https://github.com/DerrickWood/kraken2)
 
 - See [more details](https://ccb.jhu.edu/software/kraken2/) and publications about Kraken2.
-- Kraken2 needs to be installed in its own repository folder, then scripts can be copied to another location if prefered.
+- Kraken2 needs to be installed in its own repository folder, then scripts can be copied to another location if preferred.
 - Scripts: `kraken2`, `kraken2-build`, `kraken2-inspect`
 
-### **2. Build the Kraken2 Database**
+### **2. Build the Database**
 This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other built-in databases and able to create from [external sources](https://benlangmead.github.io/aws-indexes/k2).
 
 - **Create a database directory:**
@@ -248,7 +249,7 @@ This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other bu
   ```bash
   kraken2 --db </path/to/kraken2_silva> \
     --paired <trimmed_R1.fastq> <trimmed_R2.fastq> \
-    --threads <your_cpu> \
+    --threads <CPU> \
     --confidence 0.2 \
     --output kraken2_output.txt \
     --report kraken2_report.tabular
@@ -257,7 +258,7 @@ This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other bu
   ```bash
   kraken2 --db </path/to/kraken2_silva> \
     <trimmed_reads.fastq> \
-    --threads <your_cpu> \
+    --threads <CPU> \
     --confidence 0.2 \
     --output kraken2_output.txt \
     --report kraken2_report.tabular
@@ -289,13 +290,203 @@ This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other bu
       - [The standardisation of the approach to metagenomic human gut analysis: from sample collection to microbiome profiling](https://www.nature.com/articles/s41598-022-12037-3)
 
     
-**IMPORTANT**: If you encounter a result like `100% classification`, it is a **false positive**, which is likely caused by incorrect database.
+**IMPORTANT:** If you encounter a result like `100% classification`, it is a **false positive**, which is likely caused by incorrect database.
+
+---
+
+## **Refined Abundance Estimation with Bracken**
+
+### Goal:
+
+Bracken is used for refining taxonomic abundance estimates in metagenomic studies. It provides more accurate abundance estimates compared to raw Kraken2 outputs by resolving ambiguous classifications and redistributing reads to the most likely taxon. Bracken is computationally efficient and can handle large metagenomic datasets, making it suitable for high-throughput studies.
+
+### **1. Get average read length**
+- Tool: **[SeqKit](https://github.com/shenwei356/seqkit)**
+- Alternative tools: NanoPlot, seqtk
+- Purpose: Evaluate average read length for Bracken
 
 
+- After installing SeqKit, navigate to the reads folder and run the following:
+    ```bash
+    seqkit stats *.fastq.gz > read_length_summary.txt
+    ```
+  - Your file extension might be different than `.fastq.gz`
+- Once the script finished, open `read_length_summary.txt` and you can see the statistics  of each sample. As we need a single overall number for Bracken, need to process the `num_seqs` and `sum_len`.
+- Formula:
+    ```text
+    Sum of "sum_len" / Sum of "num_seqs"
+    ```
+  - Use **Excel/Libre** if you need a fast solution, without writing a script.
+  - This parameter **does not need to be strictly accurate** (feel free to round up to a whole number), Bracken needs only a ballpark-figure.
+
+### **2. Install Bracken**
+- [Download from GitHub](https://github.com/jenniferlu717/Bracken) and follow the documentation.
+
+### **3. Run Bracken build**
+- Purpose: To process the Kraken2 database to create files that describe the k-mer distribution for each taxonomic level (e.g., species, genus, family).
+- -k KMER_LEN -l READ_LEN -d MY_DB -x K_INSTALLATION -y K_TYPE -t THREADS
+    
+    ```bash
+    bracken-build -l <READ_LEN> -d <kraken2_silva> -x <kraken2> -t <CPU>
+    ```
+    **Parameters:**
+    
+    `-l`: Average read length from SeqKit
+    
+    `-d`: Path to Kraken2 database
+
+    `-x`: Kraken2 script file
+
+    `-t`: Your CPU threads, if not sure, use `8`
+
+    - Optionally `-k` flag can be used to set the K-mer length that used to build the kraken database, if not set, it uses `35` as default.
+    - In practice, several builds can be created with different K-mer options for various project requirements, for example: `15, 35, 50, 75, 100, etc`.
 
 
+### **4. Run Bracken**
+- Generate the bracken report files for visualizations.
+  
+    ```bash
+  bracken -d <kraken2_silva> \ 
+  -i <kraken2_report_file> \ 
+  -o bracken_report.bracken \ 
+  -t <THRESHOLD> \ 
+  -r <AVERAGE_READ_LEN> \ 
+  -l <LEVEL>
+   ```
+  
+    **Parameters:**
+    `-d`: Path to Kraken2 database
 
+    `-i`: Kraken2 report file (.tabular)
+
+    `-o`: Output file name
+
+    `-r`: Average read length from SeqKit, it **has to be** the same as `bracken-build -l` parameter
+
+    `-l`: Level of estimate abundance (Genus, Family etc.). Options: `D,P,C,O,F,G,S,S1`
+
+    `-t`: Threshold to report only taxa that have an abundance of at least the set number percentage in the sample being analyzed
 ----
-Seqkit
-Bracken
-Visualization
+
+
+## **Visualization**
+
+### Goal:
+
+Visualizing the results from a **Bracken report** is essential for interpreting the taxonomic composition and abundance of species or taxa in a metagenomic sample. Here are the **general practices** and **common tools** used for visualizing Bracken output:
+
+Now the issue with visualization is, it is nearly impossible to give a general guideline, as it is always tailor-made for a specific project, based on the samples and requirements. However, here are some information that can help to get started.
+
+
+### 1. Data Preparation
+Before you attempt to visualizing, make sure the generated Bracken file is in the **right format** for the selected tool. Some tools do that automatically, but many of them expect a certain input format.
+
+- **Combine report files:**
+  - This step is usually mandatory as you most likely has multiple samples, therefore multiple report files from each of the samples. Those files need to be merged into a single one in order to work with any tool.
+  - Visualization tools often give information about the expected format, but generally a comma separated (.csv) text file is the common format.
+
+- **Normalize data:**
+   - It is a good practice to filter low-abundance taxa below a certain threshold, in order to work with a smaller data source, which is computationally less intensive.
+
+Once the combined and optionally a filtered Bracken report file is ready, the visualization should be quick and ready to tweak for the requirements of the project. 
+
+### 2. Tools
+
+#### **Command Line:**
+
+- **Krona:** Interactive hierarchical pie charts for taxonomic data.
+
+- **Pavian:** A web-based tool for interactive visualization and analysis of metagenomic classification results (supports Kraken/Bracken reports).
+
+- **GraPhlAn:** A tool for creating circular taxonomic trees with abundance annotations.
+
+#### **Bash:**
+While Bash itself is primarily a command-line tool and does not include direct visualization capabilities, you can use it to call other tools or manipulate files before visualizing them. A common approach is utilizing command-line utilities and file converters.
+
+- **awk:** Can be used to filter and summarize the output data from Bracken reports.
+- **sed:** Useful for text manipulation and data formatting in the report files.
+- **gnuplot:** A powerful command-line plotting utility that can be scripted to visualize data, though it requires some setup to parse the specific format of Bracken output files.
+
+
+#### **Python:**
+Python is preferred approach to build entire pipelines and integrate the data manipulation and visualization part into.
+
+- **Pandas:** For data manipulation of the Bracken report files, allowing for easy filtering and grouping.
+- **Matplotlib:** A widely used plotting library for creating static, interactive, and animated visualizations in Python.
+- **Seaborn:** A statistical data visualization library based on Matplotlib that provides a high-level interface for drawing attractive graphics.
+- **Plotly:** An interactive graphing library that can create dashboards and dynamic visualizations.
+- **Biopython:** If you need to handle biological sequence data along with Bracken visualization tasks.
+
+
+#### **R:**
+R is well-known for statistical analysis and comes with excellent visualization libraries:
+
+- **ggplot2:** A popular R package for creating complex multi-layered graphics easily from data frames.
+- **dplyr:** Used for data manipulation, often in conjunction with ggplot2 for plotting.
+- **phyloseq:** Specifically designed for handling and visualizing microbiome data, which can incorporate Bracken results for taxonomic classification.
+- **vegan:** Useful for ecological data analysis and visualization, including diversity indices that may be relevant for Bracken output.
+
+
+#### **Conda suite:**
+Anaconda or BioConda is a distribution of Python and R programming languages designed for scientific computing, data science, machine learning and bioinformatics (BioConda). It simplifies package management and deployment. It is a more approachable solution than CLI tools, as all the necessary software are in the same place and provides a graphical interface.
+
+
+#### **Online Tools:**
+There are some online tools that can help visualize taxonomic relationships and abundance data, often with user-friendly interfaces.
+
+- **Qiime2:** While primarily focused on microbial community analysis, Qiime2 has built-in visualization tools that can process outputs from tools like Bracken, provided that the data is formatted correctly.
+- **MicrobiomeAnalyst:** A web-based platform for comprehensive microbiome data analysis and visualization. Simply upload the Bracken report file to the website and explore bar plots, heatmaps, alpha/beta diversity, etc.
+- **Galaxy:** An open-source platform that allows users to run bioinformatics tools through a web interface. You can integrate Bracken with Galaxy for visualizations.
+- **GraphPad Prism:** While primarily a statistical analysis software, it can be used interactively for data visualization if you input the Bracken output manually.
+
+
+### **3. Common Plots for Bracken Reports**
+- **Bar Plots:**
+  - Show the relative abundance of taxa (e.g., species, genus, phylum) in a sample or across multiple samples.
+  - Useful for comparing taxonomic composition between samples.
+
+- **Heatmaps:**
+  - Display the abundance of taxa across multiple samples, with colors representing abundance levels.
+  - Useful for identifying patterns or clusters in large datasets.
+
+- **Pie Charts:**
+  - Represent the proportion of different taxa in a single sample.
+  - Useful for a quick overview of dominant taxa.
+
+- **Taxonomic Trees:**
+  - Visualize the hierarchical relationships between taxa (e.g., phylum → genus → species) and their abundances.
+  - Useful for exploring the structure of the microbial community.
+
+- **Alpha Diversity Plots:**
+  - Show the diversity within a sample (e.g., Shannon index, Simpson index).
+  - Useful for comparing diversity across samples.
+
+- **Beta Diversity Plots:**
+  - Show differences in taxonomic composition between samples (e.g., PCA, PCoA, NMDS).
+  - Useful for identifying sample groupings or outliers.
+
+---
+
+### Publications
+
+[Metagenome analysis using the Kraken software suite](https://www.nature.com/articles/s41596-022-00738-y)
+
+[Bracken: Estimating species abundance in metagenomics data](https://peerj.com/articles/cs-104/)
+
+[Ultrafast and accurate 16S rRNA microbial community analysis using Kraken 2](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-020-00900-2)
+
+[Kraken: Ultrafast metagenomic sequence classification using exact alignments](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-3-r46)
+
+[Benchmarking taxonomic assignments based on 16S rRNA gene profiling](https://academic.oup.com/gigascience/article/7/5/giy054/4995265)
+
+[Metagenomic profiling pipelines improve taxonomic classification for 16S amplicon sequencing data](https://www.nature.com/articles/s41598-023-40799-x)
+
+[Studying long 16S rDNA sequences with ultrafast-metagenomic sequence classification using exact alignments (Kraken)](https://www.sciencedirect.com/science/article/abs/pii/S0167701216300112?via%3Dihub)
+
+[Profiling of Oral Bacterial Communities](https://journals.sagepub.com/doi/10.1177/0022034520914594)
+
+[Metagenomic evidence for a polymicrobial signature of sepsis](https://www.microbiologyresearch.org/content/journal/mgen/10.1099/mgen.0.000642)
+
+[A microbial signature following bariatric surgery is robustly consistent across multiple cohorts](https://www.journalofinfection.com/article/S0163-4453(20)30287-5/fulltext)
+
