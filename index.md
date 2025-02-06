@@ -44,9 +44,9 @@ Some commands are with specific parameters, for example: `-q 30`; setting depend
 
 Most likely you will have a dataset with many-many files. As the commands are written for single use, optimally you want to loop through all the files in order to generate the result from all of them, also making sure the output file naming does not overwrite any existing and important file.
 
-While the guide should work without any programming knowledge, for time-saving I highly recommend to learn the concept of Loops. Which is basically just jumping to each file and apply a command them one-by-one quickly.
+While the guide should work without any programming knowledge, for time-saving I highly recommend to learn the concept of **Loops**. Which is basically just jumping to each file and apply a command them one-by-one quickly.
 
-*Bash loop example:*
+Bash loop example:
 
 ```text
 Dataset (paired-end):
@@ -384,7 +384,7 @@ Visualizing the results from a Bracken report is essential for interpreting the 
 Now the issue with visualization is, it is nearly impossible to give a general guideline, as it is always tailor-made for a specific project, based on the samples and requirements. However, here are some information that can help to get started.
 
 
-### 1. Data Preparation
+### 1. **Data Preparation**
 Before you attempt to visualize your results, make sure the generated Bracken file is in the **right format** for the selected tool. Some tools do that automatically, but many of them expect a certain input format.
 
 - **Combine report files:**
@@ -396,7 +396,7 @@ Before you attempt to visualize your results, make sure the generated Bracken fi
 
 Once the combined and optionally a filtered Bracken report file is ready, the visualization should be quick and ready to tweak for the requirements of the project. 
 
-### 2. Tools
+### 2. **Tools**
 
 #### **Bash:**
 While Bash itself is primarily a command-line tool and does not include direct visualization capabilities, you can use it to call other tools or manipulate files before visualizing them. A common approach is utilizing command-line utilities and file converters.
@@ -447,27 +447,27 @@ There are some online tools that can help visualize taxonomic relationships and 
 
 
 ### **3. Common Plots**
-- **Bar Plots:**
+#### **Bar Plots:**
   - Show the relative abundance of taxa (e.g., species, genus, phylum) in a sample or across multiple samples.
   - Useful for comparing taxonomic composition between samples.
 
-- **Heatmaps:**
+#### **Heatmaps:**
   - Display the abundance of taxa across multiple samples, with colors representing abundance levels.
   - Useful for identifying patterns or clusters in large datasets.
 
-- **Pie Charts:**
+#### **Pie Charts:**
   - Represent the proportion of different taxa in a single sample.
   - Useful for a quick overview of dominant taxa.
 
-- **Taxonomic Trees:**
+#### **Taxonomic Trees:**
   - Visualize the hierarchical relationships between taxa (e.g., phylum → genus → species) and their abundances.
   - Useful for exploring the structure of the microbial community.
 
-- **Alpha Diversity Plots:**
+#### **Alpha Diversity Plots:**
   - Show the diversity within a sample (e.g., Shannon index, Simpson index).
   - Useful for comparing diversity across samples.
 
-- **Beta Diversity Plots:**
+#### **Beta Diversity Plots:**
   - Show differences in taxonomic composition between samples (e.g., PCA, PCoA, NMDS).
   - Useful for identifying sample groupings or outliers.
 
