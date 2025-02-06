@@ -387,11 +387,11 @@ Now the issue with visualization is, it is nearly impossible to give a general g
 ### 1. **Data Preparation**
 Before you attempt to visualize your results, make sure the generated Bracken file is in the **right format** for the selected tool. Some tools do that automatically, but many of them expect a certain input format.
 
-- **Combine report files:**
+#### **Combine report files:**
   - This step is usually mandatory as you most likely have multiple samples, therefore multiple report files from each of them. Those files need to be merged into a single one in order to work with any tool.
   - Visualization tools often give information about the expected format, but generally a comma separated (.csv) text file is the common format.
 
-- **Normalize data:**
+#### **Normalize data:**
    - It is a good practice to filter low-abundance taxa below a certain threshold, in order to work with a smaller data source, which is computationally less intensive.
 
 Once the combined and optionally a filtered Bracken report file is ready, the visualization should be quick and ready to tweak for the requirements of the project. 
@@ -495,3 +495,6 @@ There are some online tools that can help visualize taxonomic relationships and 
 
 [A microbial signature following bariatric surgery is robustly consistent across multiple cohorts](https://www.journalofinfection.com/article/S0163-4453(20)30287-5/fulltext)
 
+---
+
+###### [GitHub Repository](https://github.com/TamasKn/kraken2-guide)
