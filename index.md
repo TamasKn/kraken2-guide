@@ -35,9 +35,9 @@ kraken2-build --build --db <database/location>
 ```
 
 - Make sure to replace the placeholder with direct path, otherwise the command will result in error. 
-- Remove the `< >` symbols for the correct path.
+- **Remove** the `< >` symbols for the correct path.
 
-Some commands are with specific parameters, for example: `-q 30`; setting depends on the project, dataset and requirements, make sure you do your research what is the optimal parameter for your specific use case. If you are not sure, you may use the listed ones, but keep in mind that may result incorrect or misleading results.
+Some commands are with specific parameters, for example: `-q 30`; setting depends on the project, dataset and requirements, make sure you do your research what is the optimal parameter for your specific use case. If you are not sure, you may use the listed or software default ones, but keep in mind that may lead to incorrect or misleading results.
 
 
 ### Multiple files handling
@@ -78,7 +78,7 @@ done
 ```
 The script will read the names of the files, running FastQC with pair-end input and creates a result with the pair name.
 
-If the concept seems difficult here are some brief tutorials:
+If the concept seems difficult, here are some brief tutorials:
 - [Bash in general](https://www.freecodecamp.org/news/bash-scripting-tutorial-linux-shell-script-and-command-line-for-beginners/)
 - [Loops in Bash](https://www.geeksforgeeks.org/bash-scripting-for-loop/)
 
@@ -96,7 +96,9 @@ Running Bash file:
 
 echo "Hello from Git Bash"
 ```
-- Save it as `my_script.sh` somewhere you will find. Navigate to that location, right click on an empty space, if Git for Windows is installed, you should see in the dropdown, open it and run: `bash my_script.sh` If you see the `Hello from Git Bash` message, it works as expected.
+- Save it as `my_script.sh` somewhere and navigate to that location
+- Right click on an empty space, if Git for Windows is installed, you should see in the dropdown, open it and run: `bash my_script.sh`
+- If you see the `Hello from Git Bash` message, your terminal is ready to use
 
 ---
 
@@ -118,7 +120,10 @@ Quality Control (QC) and trimming of short reads are essential to ensure data ac
     **Parameter:**
     `-o`: Output file name
 
-    FastQC generates several files that not necessarily useful independently. To summarize the output files, use **[MultiQC](https://github.com/MultiQC/MultiQC)** to merge the FastQC files and analyze.
+  FastQC generates several files that not necessarily useful independently. 
+
+
+- To summarize the output files, use **[MultiQC](https://github.com/MultiQC/MultiQC)** to merge the FastQC files and analyze.
 
     ```bash
     multiqc <FASTQC_DIR> -o <REPORT_DIR>
@@ -186,7 +191,7 @@ Quality control (QC), filtering, and trimming are essential for processing long 
    - Purpose: Evaluate read length distribution, quality scores, and sequencing statistics.
 
         ```bash
-        fastplong -i <reads.fastq> -o <OUTPUT_FILENAME> -h QUALITY_CONTROL.html -j QUALITY_CONTROL.json -l 320
+        fastplong -i <reads.fastq> -o <OUTPUT_FILENAME> -h qc.html -j qc.json -l 320
         ```
         **Parameters:**
 
@@ -222,14 +227,14 @@ Kraken2 using exact k-mer matches to compare sequences against a reference datab
 
 
 ### **1. Installation**
-- Follow the instructions to install Kraken2 from [Kraken2 GitHub](https://github.com/DerrickWood/kraken2)
+- Follow the instructions to install Kraken2 from [GitHub](https://github.com/DerrickWood/kraken2)
 
 - See [more details](https://ccb.jhu.edu/software/kraken2/) and publications about Kraken2.
 - Kraken2 needs to be installed in its own repository folder, then scripts can be copied to another location if preferred.
 - Scripts: `kraken2`, `kraken2-build`, `kraken2-inspect`
 
 ### **2. Build the Database**
-This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other built-in databases and able to create from [external sources](https://benlangmead.github.io/aws-indexes/k2).
+This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other built-in reference and able to create from [external sources](https://benlangmead.github.io/aws-indexes/k2).
 
 - **Create a database directory:**
    ```bash
@@ -240,7 +245,7 @@ This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other bu
    kraken2-build --special silva --db /kraken2_silva
    ```
 
-   - **Note:** This process may rbe **memory (RAM) intensive** and sufficient disk space necessary, depending on the database size.
+   - **Note:** This process may be **memory (RAM) intensive** and sufficient disk space necessary, due to the database size.
 
 ### **3. Run Kraken2 for Taxonomic Classification**
 
@@ -270,7 +275,7 @@ This guide uses SILVA-138 SSURef-NR99 database, but Kraken2 has several other bu
     
   `--paired`: Paired-end reads, usually short-read sequences are paired-end
  
-  `--threads`: Your CPU threads, if not sure, use `8`
+  `--threads`: Your CPU threads, if not sure, set to `8`
   
   `--confidence`: Confidence score threshold must be between 0 and 1, see more details below
     
@@ -324,10 +329,9 @@ Bracken is used for refining taxonomic abundance estimates in metagenomic studie
 
 ### **3. Run Bracken build**
 - Purpose: To process the Kraken2 database to create files that describe the k-mer distribution for each taxonomic level (e.g., species, genus, family).
-- -k KMER_LEN -l READ_LEN -d MY_DB -x K_INSTALLATION -y K_TYPE -t THREADS
     
     ```bash
-    bracken-build -l <READ_LEN> -d <kraken2_silva> -x <kraken2> -t <CPU>
+    bracken-build -l <READ_LEN> -d </path/to/kraken2_silva> -x </kraken2/script> -t <CPU>
     ```
     **Parameters:**
     
@@ -337,17 +341,17 @@ Bracken is used for refining taxonomic abundance estimates in metagenomic studie
 
     `-x`: Kraken2 script file
 
-    `-t`: Your CPU threads, if not sure, use `8`
+    `-t`: Your CPU threads, if not sure, set to `8`
 
-    - Optionally `-k` flag can be used to set the K-mer length that used to build the kraken database, if not set, it uses `35` as default.
-    - In practice, several builds can be created with different K-mer options for various project requirements, for example: `15, 35, 50, 75, 100, etc`.
+    - Optionally `-k` flag can be used to set the K-mer length that used to build the kraken database, if not set either, it uses `35` as default in Kraken2 and Bracken.
+    - In practice, several builds can be created with different K-mer options for various project requirements, for example: `15, 30, 50, 75, 100, etc`.
 
 
 ### **4. Run Bracken**
 - Generate the bracken report files for visualizations.
   
     ```bash
-  bracken -d <kraken2_silva> \ 
+  bracken -d </path/to/kraken2_silva> \ 
   -i <kraken2_report_file> \ 
   -o bracken_report.bracken \ 
   -t <THRESHOLD> \ 
@@ -356,13 +360,14 @@ Bracken is used for refining taxonomic abundance estimates in metagenomic studie
    ```
   
     **Parameters:**
+
     `-d`: Path to Kraken2 database
 
     `-i`: Kraken2 report file (.tabular)
 
     `-o`: Output file name
 
-    `-r`: Average read length from SeqKit, it **has to be** the same as `bracken-build -l` parameter
+    `-r`: Average read length from SeqKit, it **has to be** the same number as `bracken-build -l` parameter
 
     `-l`: Level of estimate abundance (Genus, Family etc.). Options: `D,P,C,O,F,G,S,S1`
 
@@ -374,16 +379,16 @@ Bracken is used for refining taxonomic abundance estimates in metagenomic studie
 
 ### Goal:
 
-Visualizing the results from a **Bracken report** is essential for interpreting the taxonomic composition and abundance of species or taxa in a metagenomic sample. Here are the **general practices** and **common tools** used for visualizing Bracken output:
+Visualizing the results from a Bracken report is essential for interpreting the taxonomic composition and abundance of species or taxa in a metagenomic sample.
 
 Now the issue with visualization is, it is nearly impossible to give a general guideline, as it is always tailor-made for a specific project, based on the samples and requirements. However, here are some information that can help to get started.
 
 
 ### 1. Data Preparation
-Before you attempt to visualizing, make sure the generated Bracken file is in the **right format** for the selected tool. Some tools do that automatically, but many of them expect a certain input format.
+Before you attempt to visualize your results, make sure the generated Bracken file is in the **right format** for the selected tool. Some tools do that automatically, but many of them expect a certain input format.
 
 - **Combine report files:**
-  - This step is usually mandatory as you most likely has multiple samples, therefore multiple report files from each of the samples. Those files need to be merged into a single one in order to work with any tool.
+  - This step is usually mandatory as you most likely have multiple samples, therefore multiple report files from each of them. Those files need to be merged into a single one in order to work with any tool.
   - Visualization tools often give information about the expected format, but generally a comma separated (.csv) text file is the common format.
 
 - **Normalize data:**
@@ -393,6 +398,14 @@ Once the combined and optionally a filtered Bracken report file is ready, the vi
 
 ### 2. Tools
 
+#### **Bash:**
+While Bash itself is primarily a command-line tool and does not include direct visualization capabilities, you can use it to call other tools or manipulate files before visualizing them. A common approach is utilizing command-line utilities and file converters.
+
+- **awk:** Can be used to filter and summarize the output data from Bracken reports.
+- **sed:** Useful for text manipulation and data formatting in the report files.
+- **gnuplot:** A powerful command-line plotting utility that can be scripted to visualize data, though it requires some setup to parse the specific format of Bracken output files.
+
+
 #### **Command Line:**
 
 - **Krona:** Interactive hierarchical pie charts for taxonomic data.
@@ -400,13 +413,6 @@ Once the combined and optionally a filtered Bracken report file is ready, the vi
 - **Pavian:** A web-based tool for interactive visualization and analysis of metagenomic classification results (supports Kraken/Bracken reports).
 
 - **GraPhlAn:** A tool for creating circular taxonomic trees with abundance annotations.
-
-#### **Bash:**
-While Bash itself is primarily a command-line tool and does not include direct visualization capabilities, you can use it to call other tools or manipulate files before visualizing them. A common approach is utilizing command-line utilities and file converters.
-
-- **awk:** Can be used to filter and summarize the output data from Bracken reports.
-- **sed:** Useful for text manipulation and data formatting in the report files.
-- **gnuplot:** A powerful command-line plotting utility that can be scripted to visualize data, though it requires some setup to parse the specific format of Bracken output files.
 
 
 #### **Python:**
@@ -425,7 +431,6 @@ R is well-known for statistical analysis and comes with excellent visualization 
 - **ggplot2:** A popular R package for creating complex multi-layered graphics easily from data frames.
 - **dplyr:** Used for data manipulation, often in conjunction with ggplot2 for plotting.
 - **phyloseq:** Specifically designed for handling and visualizing microbiome data, which can incorporate Bracken results for taxonomic classification.
-- **vegan:** Useful for ecological data analysis and visualization, including diversity indices that may be relevant for Bracken output.
 
 
 #### **Conda suite:**
@@ -441,7 +446,7 @@ There are some online tools that can help visualize taxonomic relationships and 
 - **GraphPad Prism:** While primarily a statistical analysis software, it can be used interactively for data visualization if you input the Bracken output manually.
 
 
-### **3. Common Plots for Bracken Reports**
+### **3. Common Plots**
 - **Bar Plots:**
   - Show the relative abundance of taxa (e.g., species, genus, phylum) in a sample or across multiple samples.
   - Useful for comparing taxonomic composition between samples.
