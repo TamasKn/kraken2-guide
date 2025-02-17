@@ -213,6 +213,9 @@ Quality control (QC), filtering, and trimming are essential for processing long 
     ```
   Navigate to the folder that set as OUTPUT_DIR and find a `multiqc_report.html` for details and visualizations.
 
+
+**Note**: The short read quality control used FastQC which gives a more detailed result than FastP (FastPLong for long-reads, FastP for short-reads), feel free to use FastQC and MultiQC the same way as discussed at the Short-read Data Preparation. FastPLong used here because it does all the necessary steps at once.
+
 ---
 From this point the steps can be applied to Short- and Long-reads sequences too.
 
